@@ -1,17 +1,13 @@
-﻿using log4net;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks.Dataflow;
+using log4net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
+using NSubstitute;
 using statsd.net.Framework;
 using statsd.net.shared.Messages;
 using statsd.net.shared.Structures;
 using statsd.net_Tests.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 
 namespace statsd.net_Tests
 {
@@ -21,7 +17,7 @@ namespace statsd.net_Tests
         private ActionBlock<StatsdMessage> _block;
         private ControllableIntervalService _intervalService;
         private BucketOutputBlock _outputBuffer;
-        private Mock<ILog> _log;
+        private ILog _log;
         private MockTimeWindowService _timeWindowService;
         private DateTime _startDateTime;
 
@@ -32,12 +28,12 @@ namespace statsd.net_Tests
             _outputBuffer = new BucketOutputBlock();
             _startDateTime = new DateTime(2012, 04, 05, 17, 05, 10);
             _timeWindowService = new MockTimeWindowService(_startDateTime);
-            _log = new Mock<ILog>();
+            _log = Substitute.For<ILog>();
             _block = TimedCalendargramAggregatorBlockFactory.CreateBlock(_outputBuffer,
                 String.Empty,
                 _intervalService,
                 _timeWindowService,
-                _log.Object);
+                _log);
         }
 
         [TestMethod]

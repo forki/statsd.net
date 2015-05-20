@@ -1,18 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
+using NSubstitute;
 using statsd.net;
 using statsd.net.core;
 using statsd.net.core.Messages;
-using statsd.net.Framework;
 using statsd.net.shared;
-using statsd.net.shared.Messages;
-using statsd.net.shared.Services;
 using statsd.net_Tests.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace statsd.net_Tests
 {
@@ -39,7 +31,7 @@ namespace statsd.net_Tests
       _client = new StatsdClient.Statsd("", 0, outputChannel : new InAppListenerOutputChannel(_listener));
       _statsd.AddListener(_listener);
       _statsd.AddBackend(_backend, _systemMetrics, "testing");
-      _systemMetrics = new Mock<ISystemMetricsService>().Object;
+      _systemMetrics = Substitute.For<ISystemMetricsService>();
     }
 
     [TestCleanup]

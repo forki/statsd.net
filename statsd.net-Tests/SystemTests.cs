@@ -1,15 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using statsd.net;
-using statsd.net.shared.Messages;
-using statsd.net.shared.Services;
-using statsd.net.Framework;
-using statsd.net_Tests.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace statsd.net_Tests
 {

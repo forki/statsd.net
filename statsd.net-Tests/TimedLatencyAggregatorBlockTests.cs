@@ -1,19 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Threading.Tasks.Dataflow;
+using log4net;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 using statsd.net.core.Messages;
 using statsd.net.Framework;
 using statsd.net.shared.Messages;
-using statsd.net.shared.Services;
 using statsd.net_Tests.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-using statsd.net;
-using System.Threading;
-using log4net;
-using Moq;
 
 namespace statsd.net_Tests
 {
@@ -23,14 +16,14 @@ namespace statsd.net_Tests
     private ActionBlock<StatsdMessage> _block;
     private ControllableIntervalService _intervalService;
     private BucketOutputBlock _outputBuffer;
-    private Mock<ILog> _log;
+    private ILog _log;
 
     [TestInitialize]
     public void Initialise()
     {
       _intervalService = new ControllableIntervalService();
       _outputBuffer = new BucketOutputBlock();
-      _log = new Mock<ILog>();
+      _log = Substitute.For<ILog>();
     }
 
     [TestMethod]
@@ -40,7 +33,7 @@ namespace statsd.net_Tests
         String.Empty,
         _intervalService,
         true,
-        _log.Object);
+        _log);
       var pulseDate = DateTime.Now;
 
       _block.Post(new Timing("foo.bar.baz", 100));
@@ -67,7 +60,7 @@ namespace statsd.net_Tests
         String.Empty,
         _intervalService,
         true,
-        _log.Object);
+        _log);
       var pulseDate = DateTime.Now;
 
       _block.Post(new Timing("foo", 5));
@@ -89,7 +82,7 @@ namespace statsd.net_Tests
         String.Empty,
         _intervalService,
         true,
-        _log.Object);
+        _log);
       var pulseDate = DateTime.Now;
 
       // Bucket one
@@ -124,7 +117,7 @@ namespace statsd.net_Tests
         String.Empty,
         _intervalService,
         true,
-        _log.Object);
+        _log);
       var pulseDate = DateTime.Now;
 
       _block.Post(new Timing("foo.bar", 100));
