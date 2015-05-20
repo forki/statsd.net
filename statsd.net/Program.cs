@@ -6,7 +6,7 @@
   {
     public static void Main(string[] args)
     {
-        HostFactory.New(x => 
+        HostFactory.Run(x => 
         {
             x.Service<ServiceWrapper>();
             x.RunAsLocalSystem();
