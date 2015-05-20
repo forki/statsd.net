@@ -1,37 +1,29 @@
-﻿using statsd.net.shared;
-using statsd.net.shared.Listeners;
-using statsd.net.Framework;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.ServiceProcess;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-using statsd.net.Configuration;
-
-namespace statsd.net
+﻿namespace statsd.net
 {
-  public class ServiceWrapper : ServiceBase
+    using System.IO;
+    using System.Reflection;
+    using statsd.net.Configuration;
+    using statsd.net.shared;
+    using Topshelf;
+
+  public class ServiceWrapper : ServiceControl
   {
     private Statsd _statsd;
     private string _configFile;
     private StatsdnetConfiguration _config;
 
-    public ServiceWrapper(string configFile = null)
+    public ServiceWrapper()
     {
-      _configFile = configFile ?? "statsdnet.config";
+      _configFile = "statsdnet.config";
     }
 
-    protected override void OnStart(string[] args)
+    public bool Start(HostControl host)
     {
-      Start(false);
+        StartStatsD(false);
+        return true;
     }
 
-    protected override void OnStop()
+    public bool Stop(HostControl host)
     {
       if ( _statsd != null )
       {
@@ -44,9 +36,11 @@ namespace statsd.net
         _config.Dispose();
         _config = null;
       }
+
+      return true;
     }
 
-    public void Start(bool waitForCompletion = true)
+    public void StartStatsD(bool waitForCompletion = true)
     {
       //TODO : JV IS CONFIG FILE A ACTUAL FILE PATH?  IF SO THEN ITS MISLEADING SHOULD BE CONFIGFILEPATH??
       LoggingBootstrap.Configure();

@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "statsd.net", "statsd.net\statsd.net.csproj", "{E2212771-D19D-4CA9-92ED-E254DA99FD84}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "statsd.net-Tests", "statsd.net-Tests\statsd.net-Tests.csproj", "{347012E3-D17B-44E2-A4C6-C09352E39C57}"
@@ -15,14 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sql Backend Scripts", "Sql 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{CF42D423-DE3F-4966-9A2E-2CC2583AB2FD}"
 	ProjectSection(SolutionItems) = preProject
-		CHANGELOG.md = CHANGELOG.md
 		README.md = README.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{18963401-B5C1-402C-B83D-8BAE137FE6D7}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "statsd.net.shared", "statsd.net.shared\statsd.net.shared.csproj", "{BE150548-D5EB-4289-8706-3EA475175592}"

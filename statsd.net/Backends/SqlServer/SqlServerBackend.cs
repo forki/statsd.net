@@ -1,27 +1,19 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.ComponentModel.Composition;
+using System.Data;
+using System.Data.SqlClient;
+using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using System.Xml.Linq;
+using log4net;
+using Polly;
 using Microsoft.SqlServer.Server;
 using statsd.net.Configuration;
 using statsd.net.core;
 using statsd.net.core.Backends;
 using statsd.net.core.Messages;
 using statsd.net.core.Structures;
-using statsd.net.shared.Listeners;
-using statsd.net.shared.Messages;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-using statsd.net.shared.Services;
-using statsd.net.Framework;
-using Microsoft.Practices.TransientFaultHandling;
-using log4net;
 using statsd.net.shared;
-using statsd.net.shared.Structures;
 
 namespace statsd.net.Backends.SqlServer
 {
@@ -37,8 +29,7 @@ namespace statsd.net.Backends.SqlServer
     private static SqlMetaData[] statsdTable = { new SqlMetaData("measure", SqlDbType.VarChar, 255) };
     private ISystemMetricsService _systemMetrics;
     private int _retries;
-    private Incremental _retryStrategy;
-    private RetryPolicy<SqlServerErrorDetectionStrategy> _retryPolicy;
+    private Policy _retryPolicy;
     private ILog _log;
 
     public string Name { get { return "SqlServer"; } }  
@@ -105,13 +96,11 @@ namespace statsd.net.Backends.SqlServer
 
     private void InitialiseRetryHandling()
     {
-      _retryStrategy = new Incremental(_retries, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2));
-      _retryPolicy = new RetryPolicy<SqlServerErrorDetectionStrategy>(_retries);
-      _retryPolicy.Retrying += (sender, args) =>
+        _retryPolicy = Policy.Handle<SqlException>().WaitAndRetry(_retries, retryAttempt => TimeSpan.FromSeconds(1), (exception, timeSpan) =>
         {
-          _log.Warn(String.Format("Retry {0} failed. Trying again. Delay {1}, Error: {2}", args.CurrentRetryCount, args.Delay, args.LastException.Message), args.LastException);
-          _systemMetrics.LogCount("backends.sqlserver.retry");
-        };
+            _log.Warn(String.Format("Retry failed. Trying again. Delay {1}, Error: {2}", timeSpan, exception.Message), exception);
+            _systemMetrics.LogCount("backends.sqlserver.retry");
+        });
     }
 
     private void SendToDB(GraphiteLine[] lines)
@@ -130,7 +119,7 @@ namespace statsd.net.Backends.SqlServer
         }
         _log.DebugFormat("Attempting to send {0} lines to tb_Metrics.", tableData.Rows.Count);
 
-        _retryPolicy.ExecuteAction(() =>
+        _retryPolicy.Execute(() =>
           {
             using (var bulk = new SqlBulkCopy(_connectionString))
             {

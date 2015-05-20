@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using log4net;
-using Microsoft.Practices.TransientFaultHandling;
 using RestSharp;
 using statsd.net.Configuration;
 using statsd.net.core;
@@ -22,6 +21,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using Polly;
 
 namespace statsd.net.Backends.Librato
 {
@@ -49,8 +49,8 @@ namespace statsd.net.Backends.Librato
     private RestClient _client;
     private ISystemMetricsService _systemMetrics;
     private int _pendingOutputCount;
-    private RetryPolicy<LibratoErrorDetectionStrategy> _retryPolicy;
-    private Incremental _retryStrategy;
+    private Policy _retryPolicy;
+    //private Incremental _retryStrategy;
     private LibratoBackendConfiguration _config;
     private string _source;
 
@@ -90,13 +90,12 @@ namespace statsd.net.Backends.Librato
       _client.Authenticator = new HttpBasicAuthenticator(_config.Email, _config.Token);
       _client.Timeout = (int)_config.PostTimeout.TotalMilliseconds;
 
-      _retryPolicy = new RetryPolicy<LibratoErrorDetectionStrategy>(_config.NumRetries);
-      _retryPolicy.Retrying += (sender, args) =>
+      _retryPolicy = Policy.Handle<TimeoutException>().WaitAndRetry(_config.NumRetries, retryAttempt => _config.RetryDelay, (exception, timeSpan) => 
       {
-        _log.Warn(String.Format("Retry {0} failed. Trying again. Delay {1}, Error: {2}", args.CurrentRetryCount, args.Delay, args.LastException.Message), args.LastException);
-        _systemMetrics.LogCount("backends.librato.retry");
-      };
-      _retryStrategy = new Incremental(_config.NumRetries, _config.RetryDelay, TimeSpan.FromSeconds(2));
+          _log.Warn(String.Format("Retry failed. Trying again. Delay {1}, Error: {2}", timeSpan, exception.Message), exception);
+          _systemMetrics.LogCount("backends.librato.retry");
+      });
+
       IsActive = true;
     }
 
@@ -206,7 +205,7 @@ namespace statsd.net.Backends.Librato
         request.AddHeader("User-Agent", "statsd.net-librato-backend/" + _serviceVersion);
         request.AddBody(payload);
 
-        _retryPolicy.ExecuteAction(() =>
+        _retryPolicy.Execute(() =>
           {
             bool succeeded = false;
             try
@@ -252,17 +251,6 @@ namespace statsd.net.Backends.Librato
       payload.source = _source;
       return payload;
     }
-
-    private class LibratoErrorDetectionStrategy : ITransientErrorDetectionStrategy
-    {
-      public bool IsTransient(Exception ex)
-      {
-        if (ex is TimeoutException)
-        {
-          return true;
-        }
-        return false;
-      }
-    }
+  
   }
 }
