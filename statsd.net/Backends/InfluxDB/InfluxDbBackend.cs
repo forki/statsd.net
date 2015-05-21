@@ -5,20 +5,20 @@ using System.Data.SqlClient;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Xml.Linq;
-using log4net;
 using statsd.net.Configuration;
 using statsd.net.core;
 using statsd.net.core.Backends;
 using statsd.net.core.Messages;
 using statsd.net.core.Structures;
 using statsd.net.shared;
+using statsd.net.Logging;
 
 namespace statsd.net.Backends.InfluxDB
 {
     [Export(typeof(IBackend))]
     public class InfluxDbBackend : IBackend
     {
-        private ILog _log;
+        private ILog _log = LogProvider.GetCurrentClassLogger();
 
         private bool _isActive;
         public string Name { get { return "InfluxDB"; } }
@@ -35,9 +35,7 @@ namespace statsd.net.Backends.InfluxDB
 
         public void Configure(string collectorName, XElement configElement, ISystemMetricsService systemMetrics)
         {
-            _log = SuperCheapIOC.Resolve<ILog>();
             _systemMetrics = systemMetrics;
-
         }
 
         public int OutputCount

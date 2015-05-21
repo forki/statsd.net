@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks.Dataflow;
-using log4net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using statsd.net.Framework;
@@ -15,19 +14,16 @@ namespace statsd.net_Tests
     private ActionBlock<StatsdMessage> _block;
     private ControllableIntervalService _intervalService;
     private BucketOutputBlock _outputBuffer;
-    private ILog _log;
     
     [TestInitialize]
     public void Initialise()
     {
       _intervalService = new ControllableIntervalService();
       _outputBuffer = new BucketOutputBlock();
-      _log = Substitute.For<ILog>();
       _block = TimedGaugeAggregatorBlockFactory.CreateBlock(_outputBuffer,
         String.Empty,
         false,
-        _intervalService,
-        _log);
+        _intervalService);
     }
 
     [TestMethod]

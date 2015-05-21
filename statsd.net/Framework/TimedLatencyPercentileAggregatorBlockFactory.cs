@@ -1,28 +1,23 @@
-﻿using log4net;
-using statsd.net.core.Structures;
-using statsd.net.shared.Messages;
-using statsd.net.shared.Services;
-using statsd.net.shared.Structures;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-
-namespace statsd.net.Framework
+﻿namespace statsd.net.Framework
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Threading.Tasks.Dataflow;
+    using statsd.net.core.Structures;
+    using statsd.net.Logging;
+    using statsd.net.shared.Messages;
+    using statsd.net.shared.Services;
+    using statsd.net.shared.Structures;
+
   public class TimedLatencyPercentileAggregatorBlockFactory
   {
+      private static readonly ILog log = LogProvider.GetCurrentClassLogger();
+
     public static ActionBlock<StatsdMessage> CreateBlock(ITargetBlock<Bucket> target,
       string rootNamespace, 
       IIntervalService intervalService,
       int percentile,
       string percentileName,
-      ILog log,
       int maxItemsPerBucket = 1000)
     {
       var latencies = new ConcurrentDictionary<string, DatapointBox>();

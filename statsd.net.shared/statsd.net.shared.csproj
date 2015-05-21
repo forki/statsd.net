@@ -35,10 +35,6 @@
     <Reference Include="Kayak">
       <HintPath>..\packages\Kayak.0.7.2\lib\Kayak.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
@@ -54,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Packages\LibLog.4.2\LibLog.cs" />
     <Compile Include="BetterExpando.cs" />
     <Compile Include="Blocks\TimedBufferBlock.cs" />
     <Compile Include="Encryption\SimplerAES.cs" />
@@ -70,7 +67,6 @@
     <Compile Include="Listeners\StatsdnetTcpListener.cs" />
     <Compile Include="Listeners\TcpStatsListener.cs" />
     <Compile Include="Listeners\UdpStatsListener.cs" />
-    <Compile Include="LoggingBootstrap.cs" />
     <Compile Include="Messages\Counter.cs" />
     <Compile Include="Messages\Gauge.cs" />
     <Compile Include="Messages\InvalidMessage.cs" />

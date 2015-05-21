@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using log4net;
-using statsd.net.core;
-using statsd.net.core.Backends;
-using statsd.net.shared.Services;
-
-namespace statsd.net.Configuration
+﻿namespace statsd.net.Configuration
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.Composition;
+    using System.ComponentModel.Composition.Hosting;
+    using System.Linq;
+    using System.Xml.Linq;
+    using statsd.net.core;
+    using statsd.net.core.Backends;
+    using statsd.net.Logging;
+
   public class StatsdnetConfiguration : IDisposable
   {
-    private static readonly ILog _log = LogManager.GetLogger("statsd.net");
+    private static readonly ILog _log = LogProvider.GetLogger("statsd.net");
 
     public string Name { get; set; }
     public bool HideSystemStats { get; set; }
@@ -56,7 +53,7 @@ namespace statsd.net.Configuration
       }
       catch (CompositionException ex)
       {
-        if (_log.IsErrorEnabled)
+        if (_log.IsErrorEnabled())
         {
           _log.ErrorFormat("MEF Composition Exception: {0}", ex.Message);
 
@@ -69,7 +66,7 @@ namespace statsd.net.Configuration
 
     public IEnumerable<IBackend> GetConfiguredBackends(ISystemMetricsService systemMetrics)
     {
-      if (_log.IsInfoEnabled)
+      if (_log.IsInfoEnabled())
       {
         var availableBackendsString = String.Join(", ", AvailableBackends.Select(x => x.Name));
         _log.InfoFormat("Available Backends: {0}", availableBackendsString);
@@ -82,7 +79,7 @@ namespace statsd.net.Configuration
 
         if (backend == null)
         {
-          _log.WarnFormat("Unrecognized backend configuration for \"{0}\".  Backend will be ignored.", backendName);
+          _log.WarnFormat("Unrecognised backend configuration for \"{0}\".  Backend will be ignored.", backendName);
           continue;
         }
 

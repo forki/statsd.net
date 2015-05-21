@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks.Dataflow;
-using log4net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using statsd.net.core.Messages;
@@ -16,14 +15,12 @@ namespace statsd.net_Tests
     private ActionBlock<StatsdMessage> _block;
     private ControllableIntervalService _intervalService;
     private BucketOutputBlock _outputBuffer;
-    private ILog _log;
 
     [TestInitialize]
     public void Initialise()
     {
       _intervalService = new ControllableIntervalService();
       _outputBuffer = new BucketOutputBlock();
-      _log = Substitute.For<ILog>();
     }
 
     [TestMethod]
@@ -32,8 +29,7 @@ namespace statsd.net_Tests
       _block = TimedLatencyAggregatorBlockFactory.CreateBlock(_outputBuffer,
         String.Empty,
         _intervalService,
-        true,
-        _log);
+        true);
       var pulseDate = DateTime.Now;
 
       _block.Post(new Timing("foo.bar.baz", 100));
@@ -59,8 +55,7 @@ namespace statsd.net_Tests
       _block = TimedLatencyAggregatorBlockFactory.CreateBlock(_outputBuffer,
         String.Empty,
         _intervalService,
-        true,
-        _log);
+        true);
       var pulseDate = DateTime.Now;
 
       _block.Post(new Timing("foo", 5));
@@ -81,8 +76,7 @@ namespace statsd.net_Tests
       _block = TimedLatencyAggregatorBlockFactory.CreateBlock(_outputBuffer,
         String.Empty,
         _intervalService,
-        true,
-        _log);
+        true);
       var pulseDate = DateTime.Now;
 
       // Bucket one
@@ -116,8 +110,7 @@ namespace statsd.net_Tests
       _block = TimedLatencyAggregatorBlockFactory.CreateBlock(_outputBuffer,
         String.Empty,
         _intervalService,
-        true,
-        _log);
+        true);
       var pulseDate = DateTime.Now;
 
       _block.Post(new Timing("foo.bar", 100));

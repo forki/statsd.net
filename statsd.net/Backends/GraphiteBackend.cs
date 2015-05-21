@@ -15,8 +15,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using statsd.net.shared;
-using log4net;
 using statsd.net.shared.Structures;
+using statsd.net.Logging;
 
 namespace statsd.net.Backends
 {
@@ -27,14 +27,13 @@ namespace statsd.net.Backends
     private Task _completionTask;
     private bool _isActive;
     private ISystemMetricsService _systemMetrics;
-    private ILog _log;
+    private readonly ILog _log = LogProvider.GetCurrentClassLogger();
     private ActionBlock<GraphiteLine> _senderBlock;
 
     public string Name { get { return "Graphite"; } }  
 
     public void Configure(string collectorName, XElement configElement, ISystemMetricsService systemMetrics)
     {
-      _log = SuperCheapIOC.Resolve<ILog>();
       _systemMetrics = systemMetrics;
       _completionTask = new Task(() => { _isActive = false; });
       _senderBlock = new ActionBlock<GraphiteLine>((message) => SendLine(message), Utility.OneAtATimeExecution());

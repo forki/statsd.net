@@ -1,32 +1,21 @@
-﻿using System.Configuration;
-using System.Windows.Markup;
-using statsd.net.Backends;
-using statsd.net.core;
-using statsd.net.core.Backends;
-using statsd.net.core.Structures;
-using statsd.net.shared.Listeners;
-using statsd.net.shared.Messages;
-using statsd.net.Framework;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-using statsd.net.shared.Services;
-using log4net;
-using statsd.net.Backends.SqlServer;
-using statsd.net.shared;
-using statsd.net.shared.Factories;
-using statsd.net.shared.Structures;
-using statsd.net.Backends.Librato;
-using statsd.net.Configuration;
-using statsd.net.Backends.Statsdnet;
-
-namespace statsd.net
+﻿namespace statsd.net
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks.Dataflow;
+    using statsd.net.Configuration;
+    using statsd.net.core;
+    using statsd.net.core.Backends;
+    using statsd.net.core.Structures;
+    using statsd.net.Framework;
+    using statsd.net.Logging;
+    using statsd.net.shared;
+    using statsd.net.shared.Factories;
+    using statsd.net.shared.Listeners;
+    using statsd.net.shared.Messages;
+    using statsd.net.shared.Services;
+
     public class Statsd
     {
         private TransformBlock<string, StatsdMessage> _messageParser;
@@ -36,7 +25,7 @@ namespace statsd.net
         private List<IListener> _listeners;
         private CancellationTokenSource _tokenSource;
         private ManualResetEvent _shutdownComplete;
-        private static readonly ILog _log = LogManager.GetLogger("statsd.net");
+        private static readonly ILog _log = LogProvider.GetLogger("statsd.net");
 
         public WaitHandle ShutdownWaitHandle
         {
@@ -72,16 +61,15 @@ namespace statsd.net
             // Initialise the core blocks
             _router = new StatsdMessageRouterBlock();
             _messageParser = MessageParserBlockFactory.CreateMessageParserBlock(_tokenSource.Token,
-              SuperCheapIOC.Resolve<ISystemMetricsService>(),
-              _log);
+              SuperCheapIOC.Resolve<ISystemMetricsService>());
             _messageParser.LinkTo(_router);
-            _messageParser.Completion.LogAndContinueWith(_log, "MessageParser", () =>
+            _messageParser.Completion.LogAndContinueWith("MessageParser", () =>
               {
                   _log.Info("MessageParser: Completion signaled. Notifying the MessageBroadcaster.");
                   _messageBroadcaster.Complete();
               });
             _messageBroadcaster = new BroadcastBlock<Bucket>(Bucket.Clone);
-            _messageBroadcaster.Completion.LogAndContinueWith(_log, "MessageBroadcaster", () =>
+            _messageBroadcaster.Completion.LogAndContinueWith("MessageBroadcaster", () =>
               {
                   _log.Info("MessageBroadcaster: Completion signaled. Notifying all backends.");
                   _backends.ForEach(q => q.Complete());
@@ -137,8 +125,7 @@ namespace statsd.net
                         AddAggregator(MessageType.Counter,
                           TimedCounterAggregatorBlockFactory.CreateBlock(messageBroadcaster,
                             counter.Namespace,
-                            intervalService,
-                            _log),
+                            intervalService),
                           systemMetrics);
                         break;
                     case "gauges":
@@ -147,8 +134,7 @@ namespace statsd.net
                           TimedGaugeAggregatorBlockFactory.CreateBlock(messageBroadcaster,
                             gauge.Namespace,
                             gauge.RemoveZeroGauges,
-                            intervalService,
-                            _log),
+                            intervalService),
                           systemMetrics);
                         break;
                     case "calendargrams":
@@ -157,8 +143,7 @@ namespace statsd.net
                             TimedCalendargramAggregatorBlockFactory.CreateBlock(messageBroadcaster,
                                 calendargram.Namespace,
                                 intervalService,
-                                new TimeWindowService(),
-                                _log),
+                                new TimeWindowService()),
                                 systemMetrics);
                         break;
                     case "timers":
@@ -167,8 +152,7 @@ namespace statsd.net
                           TimedLatencyAggregatorBlockFactory.CreateBlock(messageBroadcaster,
                             timer.Namespace,
                             intervalService,
-                            timer.CalculateSumSquares,
-                            _log),
+                            timer.CalculateSumSquares),
                           systemMetrics);
                         // Add Percentiles
                         foreach (var percentile in timer.Percentiles)
@@ -178,8 +162,7 @@ namespace statsd.net
                                 timer.Namespace,
                                 intervalService,
                                 percentile.Threshold,
-                                percentile.Name,
-                                _log),
+                                percentile.Name),
                               systemMetrics);
                         }
                         break;
@@ -264,7 +247,7 @@ namespace statsd.net
             _log.InfoFormat("Adding backend {0} named '{1}'", backend.GetType().Name, name);
             _backends.Add(backend);
             _messageBroadcaster.LinkTo(backend);
-            backend.Completion.LogAndContinueWith(_log, name, () =>
+            backend.Completion.LogAndContinueWith(name, () =>
               {
                   if (_backends.All(q => !q.IsActive))
                   {

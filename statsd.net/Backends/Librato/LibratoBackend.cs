@@ -1,30 +1,24 @@
-﻿using System.ComponentModel.Composition;
-using System.Xml.Linq;
-using log4net;
-using RestSharp;
-using statsd.net.Configuration;
-using statsd.net.core;
-using statsd.net.core.Backends;
-using statsd.net.core.Structures;
-using statsd.net.shared;
-using statsd.net.shared.Messages;
-using statsd.net.shared.Services;
-using statsd.net.shared.Structures;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-using Polly;
-
-namespace statsd.net.Backends.Librato
+﻿namespace statsd.net.Backends.Librato
 {
+    using System;
+    using System.ComponentModel.Composition;
+    using System.Linq;
+    using System.Net;
+    using System.Reflection;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using System.Threading.Tasks.Dataflow;
+    using System.Xml.Linq;
+    using Polly;
+    using RestSharp;
+    using statsd.net.Configuration;
+    using statsd.net.core;
+    using statsd.net.core.Backends;
+    using statsd.net.core.Structures;
+    using statsd.net.Logging;
+    using statsd.net.shared;
+    using statsd.net.shared.Structures;
+
   /**
    * Flow of data:
    *  
@@ -40,7 +34,7 @@ namespace statsd.net.Backends.Librato
     public const string LIBRATO_API_URL = "https://metrics-api.librato.com";
 
     private Task _completionTask;
-    private ILog _log;
+    private readonly ILog _log = LogProvider.GetCurrentClassLogger();
     private string _serviceVersion;
     public bool IsActive { get; private set; }
     private ActionBlock<Bucket> _preprocessorBlock;
@@ -64,7 +58,6 @@ namespace statsd.net.Backends.Librato
     public void Configure(string collectorName, XElement configElement, ISystemMetricsService systemMetrics)
     {
       _completionTask = new Task(() => IsActive = false);
-      _log = SuperCheapIOC.Resolve<ILog>();
       _systemMetrics = systemMetrics;
 
       var config = new LibratoBackendConfiguration(
@@ -92,7 +85,7 @@ namespace statsd.net.Backends.Librato
 
       _retryPolicy = Policy.Handle<TimeoutException>().WaitAndRetry(_config.NumRetries, retryAttempt => _config.RetryDelay, (exception, timeSpan) => 
       {
-          _log.Warn(String.Format("Retry failed. Trying again. Delay {1}, Error: {2}", timeSpan, exception.Message), exception);
+          _log.WarnException(String.Format("Retry failed. Trying again. Delay {1}, Error: {2}", timeSpan, exception.Message), exception);
           _systemMetrics.LogCount("backends.librato.retry");
       });
 
@@ -185,7 +178,7 @@ namespace statsd.net.Backends.Librato
       }
       catch (Exception ex)
       {
-        _log.Error("Failed to post metrics to Librato.com", ex);
+        _log.ErrorException("Failed to post metrics to Librato.com", ex);
         _systemMetrics.LogCount("backends.librato.post.error." + ex.GetType().Name);
       }
     }

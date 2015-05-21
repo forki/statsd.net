@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
-using log4net;
 using NSubstitute;
 using Shouldly;
 using statsd.net.core;
@@ -16,15 +15,12 @@ namespace statsd.net_Tests
   {
     private TransformBlock<string, StatsdMessage> _block;
     private ISystemMetricsService _systemMetrics;
-    private ILog _log;
 
     public MessageParserBlockTests()
     {
       _systemMetrics = Substitute.For<ISystemMetricsService>();
-      _log = Substitute.For<ILog>();
       _block = MessageParserBlockFactory.CreateMessageParserBlock(new CancellationToken(), 
-        _systemMetrics,
-        _log);
+        _systemMetrics);
     }
 
     [Fact]

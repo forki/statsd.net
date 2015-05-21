@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.Composition;
 using System.Xml.Linq;
-using log4net;
-using log4net.Core;
 using statsd.net.Configuration;
 using statsd.net.core;
 using statsd.net.core.Backends;
@@ -18,6 +16,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using statsd.net.Logging;
 
 namespace statsd.net.Backends.Statsdnet
 {
@@ -27,6 +26,8 @@ namespace statsd.net.Backends.Statsdnet
   [Export(typeof(IBackend))]
   public class StatsdnetBackend : IBackend
   {
+      private readonly ILog log = LogProvider.GetCurrentClassLogger();
+
     private Task _completionTask;
     private bool _isActive;
     private TimedBufferBlock<GraphiteLine[]> _bufferBlock;

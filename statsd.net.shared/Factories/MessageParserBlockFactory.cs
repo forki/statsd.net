@@ -1,23 +1,18 @@
-﻿using statsd.net.core;
-using statsd.net.shared.Listeners;
-using statsd.net.shared.Messages;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-using statsd.net.shared.Services;
-using log4net;
-
-namespace statsd.net.shared.Factories
+﻿namespace statsd.net.shared.Factories
 {
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks.Dataflow;
+    using statsd.net.core;
+    using statsd.net.shared.Logging;
+    using statsd.net.shared.Messages;
+
   public static class MessageParserBlockFactory
   {
+    private static readonly ILog log = LogProvider.GetCurrentClassLogger();
+
     public static TransformBlock<String, StatsdMessage> CreateMessageParserBlock(CancellationToken cancellationToken,
-      ISystemMetricsService systemMetrics,
-      ILog log)
+      ISystemMetricsService systemMetrics)
     {
       var block = new TransformBlock<String, StatsdMessage>(
         (line) =>

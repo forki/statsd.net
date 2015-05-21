@@ -5,7 +5,6 @@ using System.Data.SqlClient;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Xml.Linq;
-using log4net;
 using Polly;
 using Microsoft.SqlServer.Server;
 using statsd.net.Configuration;
@@ -14,6 +13,7 @@ using statsd.net.core.Backends;
 using statsd.net.core.Messages;
 using statsd.net.core.Structures;
 using statsd.net.shared;
+using statsd.net.Logging;
 
 namespace statsd.net.Backends.SqlServer
 {
@@ -30,13 +30,12 @@ namespace statsd.net.Backends.SqlServer
     private ISystemMetricsService _systemMetrics;
     private int _retries;
     private Policy _retryPolicy;
-    private ILog _log;
+    private readonly ILog _log = LogProvider.GetCurrentClassLogger();
 
     public string Name { get { return "SqlServer"; } }  
 
     public void Configure(string collectorName, XElement configElement, ISystemMetricsService systemMetrics)
     {
-      _log = SuperCheapIOC.Resolve<ILog>();
       _systemMetrics = systemMetrics;
 
       var config = new SqlServerConfiguration(configElement.Attribute("connectionString").Value, configElement.ToInt("writeBatchSize"));
@@ -98,7 +97,7 @@ namespace statsd.net.Backends.SqlServer
     {
         _retryPolicy = Policy.Handle<SqlException>().WaitAndRetry(_retries, retryAttempt => TimeSpan.FromSeconds(1), (exception, timeSpan) =>
         {
-            _log.Warn(String.Format("Retry failed. Trying again. Delay {1}, Error: {2}", timeSpan, exception.Message), exception);
+            _log.WarnException(String.Format("Retry failed. Trying again. Delay {1}, Error: {2}", timeSpan, exception.Message), exception);
             _systemMetrics.LogCount("backends.sqlserver.retry");
         });
     }
@@ -132,7 +131,7 @@ namespace statsd.net.Backends.SqlServer
       }
       catch (Exception ex)
       {
-        _log.Error("SqlServerBackend: All retries failed.", ex);
+        _log.ErrorException("SqlServerBackend: All retries failed.", ex);
         _systemMetrics.LogCount("backends.sqlserver.droppedData");
       }
     }

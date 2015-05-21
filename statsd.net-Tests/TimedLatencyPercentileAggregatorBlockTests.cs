@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks.Dataflow;
-using log4net;
 using NSubstitute;
 using Shouldly;
 using statsd.net.Framework;
@@ -16,13 +15,11 @@ namespace statsd.net_Tests
     private ActionBlock<StatsdMessage> _block;
     private ControllableIntervalService _intervalService;
     private BucketOutputBlock _outputBuffer;
-    private ILog _log;
 
     public TimedLatencyPercentileAggregatorBlockTests()
     {
       _intervalService = new ControllableIntervalService();
       _outputBuffer = new BucketOutputBlock();
-      _log = Substitute.For<ILog>();
     }
 
     [Fact]
@@ -32,8 +29,7 @@ namespace statsd.net_Tests
         String.Empty,
         _intervalService,
         50,
-        null,
-        _log);
+        null);
 
       TestUtility.Range(100, false).ForEach(p => _block.Post(new Timing("foo", p)));
       _block.WaitUntilAllItemsProcessed();
@@ -48,8 +44,7 @@ namespace statsd.net_Tests
         String.Empty,
         _intervalService,
         90,
-        null,
-        _log);
+        null);
 
       TestUtility.Range(100, false).ForEach(p => _block.Post(new Timing("foo", p)));
       _block.WaitUntilAllItemsProcessed();
@@ -65,8 +60,7 @@ namespace statsd.net_Tests
         String.Empty,
         _intervalService,
         90,
-        null,
-        _log);
+        null);
 
       _block.Post(new Timing("foo", 100));
       _block.Post(new Timing("foo", 200));
@@ -86,8 +80,7 @@ namespace statsd.net_Tests
         String.Empty,
         _intervalService,
         80,
-        null,
-        _log);
+        null);
       var pulseDate = DateTime.Now;
 
       // Bucket one

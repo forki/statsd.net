@@ -1,5 +1,4 @@
-﻿using log4net;
-using statsd.net.core;
+﻿using statsd.net.core;
 using statsd.net.core.Backends;
 using statsd.net.core.Messages;
 using statsd.net.core.Structures;
@@ -13,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Xml.Linq;
+using statsd.net.Logging;
 
 namespace statsd.net.Backends
 {
@@ -24,7 +24,7 @@ namespace statsd.net.Backends
         private bool _isActive;
         private TcpClient _client;
         private ISystemMetricsService _systemMetrics;
-        private ILog _log;
+        private readonly ILog _log = LogProvider.GetCurrentClassLogger();
         private BatchBlock<GraphiteLine> _batchBlock;
         private ActionBlock<GraphiteLine[]> _senderBlock;
         private Task _completionTask;
@@ -48,7 +48,6 @@ namespace statsd.net.Backends
 
         public void Configure(string collectorName, XElement configElement, ISystemMetricsService systemMetrics)
         {
-            _log = SuperCheapIOC.Resolve<ILog>();
             _systemMetrics = systemMetrics;
             _completionTask = new Task(() => { _isActive = false; });
             _batchBlock = new BatchBlock<GraphiteLine>(BATCH_SIZE);
@@ -98,7 +97,7 @@ namespace statsd.net.Backends
             }
             catch (Exception ex)
             {
-                _log.Error(String.Format("Could not write batch to graphite host at {0}:{1}", _host, _port), ex);
+                _log.ErrorException(String.Format("Could not write batch to graphite host at {0}:{1}", _host, _port), ex);
                 _systemMetrics.LogCount("backends.graphite-tcp.write.failure");
                 _systemMetrics.LogCount("backends.graphite-tcp.write.exception." + ex.GetType().Name);
             }

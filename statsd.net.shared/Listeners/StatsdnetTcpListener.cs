@@ -1,21 +1,17 @@
-﻿using log4net;
-using statsd.net.core;
-using statsd.net.shared.Messages;
-using statsd.net.shared.Services;
-using statsd.net.shared.Structures;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-
-namespace statsd.net.shared.Listeners
+﻿namespace statsd.net.shared.Listeners
 {
+    using System;
+    using System.IO;
+    using System.Net;
+    using System.Net.Sockets;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using System.Threading.Tasks.Dataflow;
+    using statsd.net.core;
+    using statsd.net.shared.Logging;
+    using statsd.net.shared.Structures;
+    
   public class StatsdnetTcpListener : IListener
   {
     private const int READ_TIMEOUT = 5000; /* 5 seconds */
@@ -28,14 +24,13 @@ namespace statsd.net.shared.Listeners
     private TcpListener _tcpListener;
     private int _activeConnections;
     private ActionBlock<DecoderBlockPacket> _decoderBlock;
-    private ILog _log;
+    private readonly ILog _log = LogProvider.GetCurrentClassLogger();
 
     public bool IsListening { get; private set; }
 
     public StatsdnetTcpListener(int port, ISystemMetricsService systemMetrics)
     {
       _systemMetrics = systemMetrics;
-      _log = SuperCheapIOC.Resolve<ILog>();
 
       IsListening = false;
       _activeConnections = 0;
@@ -93,12 +88,12 @@ namespace statsd.net.shared.Listeners
       {
         // oops, we're done  
         _systemMetrics.LogCount("listeners.statsdnet.error.SocketException." + se.SocketErrorCode.ToString());
-        _log.Error(String.Format("Socket Error occurred while listening. Code: {0}", se.SocketErrorCode), se);
+        _log.ErrorException(String.Format("Socket Error occurred while listening. Code: {0}", se.SocketErrorCode), se);
       }
       catch (Exception ex)
       {
         _systemMetrics.LogCount("listeners.statsdnet.error." + ex.GetType().Name);
-        _log.Error(String.Format("{0} Error occurred while listening: ", ex.GetType().Name, ex.Message),
+        _log.ErrorException(String.Format("{0} Error occurred while listening: ", ex.GetType().Name, ex.Message),
           ex);
       }
       finally

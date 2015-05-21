@@ -1,20 +1,19 @@
-﻿using log4net;
-using statsd.net.shared;
-using statsd.net.shared.Messages;
-using System;
-using System.Collections.Concurrent;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Xml.Linq;
+using statsd.net.shared;
+using statsd.net.shared.Logging;
 
 public static class ExtensionMethods
 {
+    private static readonly ILog log = LogProvider.GetCurrentClassLogger();
+
     public static long ToEpoch(this DateTime dateTime)
     {
         return (dateTime.ToUniversalTime().Ticks - 621355968000000000) / 10000000;
@@ -62,18 +61,18 @@ public static class ExtensionMethods
         return dict.ContainsKey(propertyName);
     }
 
-    public static void LogAndContinueWith(this Task task, ILog log, string name, Action action)
+    public static void LogAndContinueWith(this Task task, string name, Action action)
     {
         task.ContinueWith(_ =>
           {
               switch (task.Status)
               {
                   case TaskStatus.Faulted:
-                      log.Error(String.Format("{0} has faulted. Error: {1}", name, task.Exception.InnerException.GetType().Name),
+                      log.ErrorException(String.Format("{0} has faulted. Error: {1}", name, task.Exception.InnerException.GetType().Name),
                         task.Exception.InnerException);
                       break;
                   case TaskStatus.Canceled:
-                      log.Warn(String.Format("{0} has been canceled.", name));
+                      log.Warn(String.Format("{0} has been cancelled.", name));
                       break;
                   default:
                       log.Info(String.Format("{0} is {1}.", name, task.Status.ToString()));

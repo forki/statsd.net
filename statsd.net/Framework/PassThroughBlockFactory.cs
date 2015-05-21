@@ -1,19 +1,13 @@
-﻿using log4net;
-using statsd.net.core.Structures;
-using statsd.net.shared;
-using statsd.net.shared.Messages;
-using statsd.net.shared.Services;
-using statsd.net.shared.Structures;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-
-namespace statsd.net.Framework
+﻿namespace statsd.net.Framework
 {
+    using System.Collections.Concurrent;
+    using System.Threading.Tasks.Dataflow;
+    using statsd.net.core.Structures;
+    using statsd.net.shared;
+    using statsd.net.shared.Messages;
+    using statsd.net.shared.Services;
+    using statsd.net.shared.Structures;
+    
   /// <summary>
   /// Batches and sends messages through
   /// </summary>

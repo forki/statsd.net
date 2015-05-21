@@ -9,21 +9,22 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Collections.Concurrent;
-using log4net;
+using statsd.net.Logging;
 using statsd.net.shared.Structures;
 
 namespace statsd.net.Framework
 {
     public class TimedSetAggregatorBlockFactory
     {
+        private static readonly ILog log = LogProvider.GetCurrentClassLogger();
+
         public static readonly char[] UNDERSCORE = new char[] { '_' };
         public const string METRIC_IDENTIFIER_SEPARATOR = "^ ^";
         public static readonly string[] METRIC_IDENTIFIER_SEPARATOR_SPLITTER = new String[] { "^ ^" };
 
         public static ActionBlock<StatsdMessage> CreateBlock(ITargetBlock<CounterBucket> target,
           string rootNamespace,
-          IIntervalService intervalService,
-          ILog log)
+          IIntervalService intervalService)
         {
             var sets = new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
             var windows = new ConcurrentDictionary<string, ConcurrentDictionary<string, bool>>();
