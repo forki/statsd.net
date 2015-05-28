@@ -90,7 +90,7 @@
     <Compile Include="Structures\RawBucket.cs" />
     <Compile Include="Structures\SetsBucket.cs" />
     <Compile Include="Structures\TimeWindow.cs" />
-    <Compile Include="SuperCheapIOC.cs" />
+    <Compile Include="TinyIoC.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>

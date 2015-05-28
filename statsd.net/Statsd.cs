@@ -15,6 +15,7 @@
     using statsd.net.shared.Listeners;
     using statsd.net.shared.Messages;
     using statsd.net.shared.Services;
+    using TinyIoC;
 
     public class Statsd
     {
@@ -41,12 +42,16 @@
             _tokenSource = new CancellationTokenSource();
             _shutdownComplete = new ManualResetEvent(false);
 
-            SuperCheapIOC.Add(_log);
             var systemInfoService = new SystemInfoService();
-            SuperCheapIOC.Add(systemInfoService as ISystemInfoService);
+
+            var container = TinyIoCContainer.Current;
+            container.Register<ISystemInfoService, SystemInfoService>(systemInfoService);
+
+            
             serviceName = serviceName ?? systemInfoService.HostName;
             var systemMetricsService = new SystemMetricsService("statsdnet", serviceName);
-            SuperCheapIOC.Add(systemMetricsService as ISystemMetricsService);
+
+            container.Register<ISystemMetricsService, SystemMetricsService>(systemMetricsService);
 
             /**
              * The flow is:
@@ -60,8 +65,7 @@
 
             // Initialise the core blocks
             _router = new StatsdMessageRouterBlock();
-            _messageParser = MessageParserBlockFactory.CreateMessageParserBlock(_tokenSource.Token,
-              SuperCheapIOC.Resolve<ISystemMetricsService>());
+            _messageParser = MessageParserBlockFactory.CreateMessageParserBlock(_tokenSource.Token, container.Resolve<ISystemMetricsService>());
             _messageParser.LinkTo(_router);
             _messageParser.Completion.LogAndContinueWith("MessageParser", () =>
               {
@@ -76,7 +80,7 @@
               });
 
             // Add the broadcaster to the IOC container
-            SuperCheapIOC.Add<BroadcastBlock<Bucket>>(_messageBroadcaster);
+            container.Register<BroadcastBlock<Bucket>>(_messageBroadcaster);
             systemMetricsService.SetTarget(_messageBroadcaster);
 
             _backends = new List<IBackend>();
@@ -87,7 +91,7 @@
             : this(config.Name)
         {
             _log.Info("statsd.net loading config.");
-            var systemMetrics = SuperCheapIOC.Resolve<ISystemMetricsService>();
+            var systemMetrics = TinyIoCContainer.Current.Resolve<ISystemMetricsService>();
             systemMetrics.HideSystemStats = config.HideSystemStats;
 
             LoadBackends(config, systemMetrics);

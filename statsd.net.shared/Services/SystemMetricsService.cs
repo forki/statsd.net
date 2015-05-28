@@ -12,6 +12,7 @@ using statsd.net.core.Structures;
 using statsd.net.shared.Listeners;
 using statsd.net.shared.Messages;
 using statsd.net.shared.Structures;
+using TinyIoC;
 
 namespace statsd.net.shared.Services
 {
@@ -61,8 +62,9 @@ namespace statsd.net.shared.Services
         return;
       }
 
+
       // Get a count of metrics waiting to be sent out
-      var outputBufferCount = SuperCheapIOC.ResolveAll<IBackend>().Sum(p => p.OutputCount);
+      var outputBufferCount = TinyIoCContainer.Current.ResolveAll<IBackend>().Sum(p => p.OutputCount);
       LogGauge("outputBuffer", outputBufferCount);
       LogGauge("up", 1);
 

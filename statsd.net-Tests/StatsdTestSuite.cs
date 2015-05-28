@@ -22,7 +22,6 @@ namespace statsd.net_Tests
     [TestInitialize]
     public void Setup()
     {
-      SuperCheapIOC.Reset();
       _statsd = new Statsd();
       _listener = new InAppListener();
       _backend = new InAppBackend();
