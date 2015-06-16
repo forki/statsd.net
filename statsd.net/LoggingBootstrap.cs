@@ -18,7 +18,7 @@
                 .Enrich.WithProcessId()
                 .Enrich.WithProcessId()
                 .Enrich.WithThreadId()
-                .WriteTo.ColoredConsole(outputTemplate: logLayout)
+                .WriteTo.LiterateConsole(outputTemplate: logLayout)
                 .WriteTo.File(logFileName, outputTemplate: logLayout)
                 .CreateLogger();
         }
