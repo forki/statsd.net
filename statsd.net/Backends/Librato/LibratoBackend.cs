@@ -11,6 +11,7 @@
     using System.Xml.Linq;
     using Polly;
     using RestSharp;
+    using RestSharp.Authenticators;
     using statsd.net.Configuration;
     using statsd.net.core;
     using statsd.net.core.Backends;
