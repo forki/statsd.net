@@ -44,13 +44,13 @@ namespace statsd.net.shared.Listeners
           _scheduler.Start();
         }
         IsListening = false;
-      });
+      }, token);
 
       Task.Factory.StartNew(() =>
       {
         token.WaitHandle.WaitOne();
         _scheduler.Stop();
-      });
+      }, token);
     }
 
     public bool IsListening { get; private set; }
