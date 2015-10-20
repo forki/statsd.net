@@ -1,43 +1,37 @@
-﻿using System.ComponentModel.Composition;
-using System.Xml.Linq;
-using statsd.net.Configuration;
-using statsd.net.core;
-using statsd.net.core.Backends;
-using statsd.net.core.Messages;
-using statsd.net.core.Structures;
-using statsd.net.shared.Messages;
-using statsd.net.shared.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-using statsd.net.shared;
-using statsd.net.shared.Structures;
-using statsd.net.Logging;
+﻿using System;
 
 namespace statsd.net.Backends
 {
-  [Export(typeof(IBackend))]
+  using System.ComponentModel.Composition;
+  using System.Net.Sockets;
+  using System.Text;
+  using System.Threading.Tasks;
+  using System.Threading.Tasks.Dataflow;
+  using System.Xml.Linq;
+  using statsd.net.core;
+  using statsd.net.core.Backends;
+  using statsd.net.core.Messages;
+  using statsd.net.core.Structures;
+  using statsd.net.Configuration;
+  using statsd.net.Logging;
+  using statsd.net.shared;
+
+  [Export(typeof (IBackend))]
   public class GraphiteBackend : IBackend
   {
     private UdpClient _client;
-    private Task _completionTask;
-    private bool _isActive;
     private ISystemMetricsService _systemMetrics;
     private readonly ILog _log = LogProvider.GetCurrentClassLogger();
     private ActionBlock<GraphiteLine> _senderBlock;
 
-    public string Name { get { return "Graphite"; } }  
+    public string Name => "Graphite";
 
     public void Configure(string collectorName, XElement configElement, ISystemMetricsService systemMetrics)
     {
       _systemMetrics = systemMetrics;
-      _completionTask = new Task(() => { _isActive = false; });
-      _senderBlock = new ActionBlock<GraphiteLine>((message) => SendLine(message), Utility.OneAtATimeExecution());
-      _isActive = true;
+      Completion = new Task(() => { IsActive = false; });
+      _senderBlock = new ActionBlock<GraphiteLine>(message => SendLine(message), Utility.OneAtATimeExecution());
+      IsActive = true;
 
       var config = new GraphiteConfiguration(configElement.Attribute("host").Value, configElement.ToInt("port"));
 
@@ -46,17 +40,12 @@ namespace statsd.net.Backends
       _client.Connect(ipAddress, config.Port);
     }
 
-    public bool IsActive
-    {
-      get { return _isActive; }
-    }
+    public bool IsActive { get; private set; }
 
-    public int OutputCount
-    {
-      get { return 0; }
-    }
+    public int OutputCount => 0;
 
-    public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, Bucket messageValue, ISourceBlock<Bucket> source, bool consumeToAccept)
+    public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, Bucket messageValue,
+      ISourceBlock<Bucket> source, bool consumeToAccept)
     {
       messageValue.FeedTarget(_senderBlock);
       return DataflowMessageStatus.Accepted;
@@ -64,13 +53,10 @@ namespace statsd.net.Backends
 
     public void Complete()
     {
-      _completionTask.Start();
+      Completion.Start();
     }
 
-    public Task Completion
-    {
-      get { return _completionTask; }
-    }
+    public Task Completion { get; private set; }
 
     public void Fault(Exception exception)
     {
@@ -88,7 +74,7 @@ namespace statsd.net.Backends
       }
       catch (SocketException ex)
       {
-        _log.Error("Failed to send packet to Graphite: " + ex.SocketErrorCode.ToString());
+        _log.Error("Failed to send packet to Graphite: " + ex.SocketErrorCode);
       }
     }
   }
