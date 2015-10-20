@@ -1,7 +1,6 @@
-﻿using System;
-
-namespace statsd.net.Backends
+﻿namespace statsd.net.Backends
 {
+  using System;
   using System.ComponentModel.Composition;
   using System.Net.Sockets;
   using System.Text;
