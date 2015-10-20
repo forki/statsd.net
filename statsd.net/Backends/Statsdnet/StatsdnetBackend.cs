@@ -1,40 +1,36 @@
-﻿using System.ComponentModel.Composition;
-using System.Xml.Linq;
-using statsd.net.Configuration;
-using statsd.net.core;
-using statsd.net.core.Backends;
-using statsd.net.core.Messages;
-using statsd.net.core.Structures;
-using statsd.net.shared;
-using statsd.net.shared.Blocks;
-using statsd.net.shared.Messages;
-using statsd.net.shared.Services;
-using statsd.net.shared.Structures;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-using statsd.net.Logging;
+﻿using System;
 
 namespace statsd.net.Backends.Statsdnet
 {
+  using System.Collections.Generic;
+  using System.ComponentModel.Composition;
+  using System.Linq;
+  using System.Text;
+  using System.Threading.Tasks;
+  using System.Threading.Tasks.Dataflow;
+  using System.Xml.Linq;
+  using statsd.net.core;
+  using statsd.net.core.Backends;
+  using statsd.net.core.Messages;
+  using statsd.net.core.Structures;
+  using statsd.net.Configuration;
+  using statsd.net.Logging;
+  using statsd.net.shared;
+  using statsd.net.shared.Blocks;
+
   /// <summary>
   /// Forwards all metrics on to another statsd.net instance over TCP.
   /// </summary>
-  [Export(typeof(IBackend))]
+  [Export(typeof (IBackend))]
   public class StatsdnetBackend : IBackend
   {
-      private readonly ILog log = LogProvider.GetCurrentClassLogger();
+    private readonly ILog log = LogProvider.GetCurrentClassLogger();
 
-    private Task _completionTask;
-    private bool _isActive;
     private TimedBufferBlock<GraphiteLine[]> _bufferBlock;
     private ISystemMetricsService _systemMetrics;
     private StatsdnetForwardingClient _client;
 
-    public string Name { get { return "Statsdnet"; } }  
+    public string Name => "Statsdnet";
 
     public void Configure(string collectorName, XElement configElement, ISystemMetricsService systemMetrics)
     {
@@ -44,29 +40,23 @@ namespace statsd.net.Backends.Statsdnet
         configElement.ToInt("port"),
         Utility.ConvertToTimespan(configElement.Attribute("flushInterval").Value),
         configElement.ToBoolean("enableCompression", true));
-      
+
       _client = new StatsdnetForwardingClient(config.Host, config.Port, _systemMetrics);
       _bufferBlock = new TimedBufferBlock<GraphiteLine[]>(config.FlushInterval, PostMetrics);
 
-      _completionTask = new Task(() =>
-      {
-        _isActive = false;
-      });
+      Completion = new Task(() => { IsActive = false; });
 
-      _isActive = true;
+      IsActive = true;
     }
 
     private void PostMetrics(GraphiteLine[][] lineArrays)
     {
       var lines = new List<GraphiteLine>();
-      foreach(var graphiteLineArray in lineArrays)
+      foreach (var graphiteLineArray in lineArrays)
       {
-        foreach (var line in graphiteLineArray)
-        {
-          lines.Add(line);
-        }
+        lines.AddRange(graphiteLineArray);
       }
-      var rawText = String.Join(Environment.NewLine,
+      var rawText = string.Join(Environment.NewLine,
         lines.Select(line => line.ToString()).ToArray());
       var bytes = Encoding.UTF8.GetBytes(rawText);
       if (_client.Send(bytes))
@@ -76,19 +66,13 @@ namespace statsd.net.Backends.Statsdnet
       }
     }
 
-    public bool IsActive
-    {
-      get { return _isActive; }
-    }
+    public bool IsActive { get; private set; }
 
-    public int OutputCount
-    {
-      get { return 0; }
-    }
+    public int OutputCount => 0;
 
-    public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, 
-      Bucket messageValue, 
-      ISourceBlock<Bucket> source, 
+    public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader,
+      Bucket messageValue,
+      ISourceBlock<Bucket> source,
       bool consumeToAccept)
     {
       var lines = messageValue.ToLines();
@@ -99,13 +83,10 @@ namespace statsd.net.Backends.Statsdnet
 
     public void Complete()
     {
-      _completionTask.Start();
+      Completion.Start();
     }
 
-    public Task Completion
-    {
-      get { return _completionTask; }
-    }
+    public Task Completion { get; private set; }
 
     public void Fault(Exception exception)
     {

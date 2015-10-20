@@ -1,31 +1,27 @@
-﻿using statsd.net.core;
-using statsd.net.shared;
-using statsd.net.shared.Services;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
-using statsd.net.Logging;
+﻿using System;
 
 namespace statsd.net.Backends.Statsdnet
 {
+  using System.IO;
+  using System.Net.Sockets;
+  using statsd.net.core;
+  using statsd.net.Logging;
+
   public class StatsdnetForwardingClient
   {
     // Lots of opinions on what the correct value is: http://webmasters.stackexchange.com/questions/31750/what-is-recommended-minimum-object-size-for-gzip-performance-benefits
     private const int COMPRESSION_SIZE_THRESHOLD = 350;
     private TcpClient _client;
     private BinaryWriter _writer;
-    private string _host;
-    private int _port;
-    private int _numRetries;
-    private bool _enableCompression;
-    private ISystemMetricsService _systemMetrics;
+    private readonly string _host;
+    private readonly int _port;
+    private readonly int _numRetries;
+    private readonly bool _enableCompression;
+    private readonly ISystemMetricsService _systemMetrics;
     private readonly ILog _log = LogProvider.GetCurrentClassLogger();
 
-    public StatsdnetForwardingClient(string host, int port, ISystemMetricsService systemMetrics, int numRetries = 1, bool enableCompression = true)
+    public StatsdnetForwardingClient(string host, int port, ISystemMetricsService systemMetrics, int numRetries = 1,
+      bool enableCompression = true)
     {
       _host = host;
       _port = port;
@@ -35,12 +31,12 @@ namespace statsd.net.Backends.Statsdnet
       _client = new TcpClient();
     }
 
-    public bool Send (byte[] data)
+    public bool Send(byte[] data)
     {
       return Send(data, _numRetries);
     }
 
-    private bool Send (byte[] data, int retryAttemptsLeft)
+    private bool Send(byte[] data, int retryAttemptsLeft)
     {
       /** Statsd.net packet format consists of
        * byte 0: 32-bit integer length
@@ -54,19 +50,16 @@ namespace statsd.net.Backends.Statsdnet
       }
 
       Func<bool> handleRetry = () =>
+      {
+        _systemMetrics.LogCount("backends.statsdnet.sendFailed");
+        if (retryAttemptsLeft > 0)
         {
-          _systemMetrics.LogCount("backends.statsdnet.sendFailed");
-          if (retryAttemptsLeft > 0)
-          {
-            _systemMetrics.LogCount("backends.statsdnet.retrySend");
-            return Send(data, --retryAttemptsLeft);
-          }
-          else
-          {
-            _systemMetrics.LogCount("backends.statsdnet.retrySendFailed");
-            return false;
-          }
-        };
+          _systemMetrics.LogCount("backends.statsdnet.retrySend");
+          return Send(data, --retryAttemptsLeft);
+        }
+        _systemMetrics.LogCount("backends.statsdnet.retrySendFailed");
+        return false;
+      };
 
       try
       {
@@ -105,23 +98,20 @@ namespace statsd.net.Backends.Statsdnet
       }
       catch (SocketException se)
       {
-        _systemMetrics.LogCount("backends.statsdnet.error.SocketException." + se.SocketErrorCode.ToString());
-        _log.ErrorException(String.Format("Socket Error occurred while listening. Code: {0}", se.SocketErrorCode), se);
+        _systemMetrics.LogCount("backends.statsdnet.error.SocketException." + se.SocketErrorCode);
+        _log.ErrorException(string.Format("Socket Error occurred while listening. Code: {0}", se.SocketErrorCode), se);
         return handleRetry();
       }
       catch (Exception ex)
       {
         _systemMetrics.LogCount("backends.statsdnet.error." + ex.GetType().Name);
-        _log.ErrorException(String.Format("{0} Error occurred while listening: ", ex.GetType().Name, ex.Message),
+        _log.ErrorException(string.Format("{0} Error occurred while listening: ", ex.GetType().Name, ex.Message),
           ex);
         if (ex is IOException)
         {
           return handleRetry();
         }
-        else
-        {
-          return false;
-        }
+        return false;
       }
     }
   }
