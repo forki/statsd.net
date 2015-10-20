@@ -12,7 +12,6 @@
     using System.Threading.Tasks;
     using System.Threading.Tasks.Dataflow;
     using System.Xml.Linq;
-    using Jil;
     using Polly;
     using statsd.net.Configuration;
     using statsd.net.core;
@@ -203,7 +202,7 @@
         var request = new HttpRequestMessage();
         request.Headers.Add("User-Agent", "statsd.net-librato-backend/" + _serviceVersion);
 
-        var content = new StringContent(JSON.Serialize(payload), Encoding.UTF8, "application/json");
+        var content = new StringContent(SimpleJson.SerializeObject(payload), Encoding.UTF8, "application/json");
 
         _retryPolicy.Execute(() =>
           {
