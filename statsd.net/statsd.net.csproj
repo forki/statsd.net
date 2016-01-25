@@ -16,6 +16,10 @@
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MurmurHash, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\murmurhash.1.0.0\lib\net45\MurmurHash.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Polly, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Polly.3.0.0\lib\net45\Polly.dll</HintPath>
       <Private>True</Private>
@@ -79,6 +83,7 @@
     <Compile Include="Configuration\ConfigurationFactory.cs" />
     <Compile Include="Configuration\ListenerConfiguration.cs" />
     <Compile Include="Configuration\StatsdnetConfiguration.cs" />
+    <Compile Include="EventTypeEnricher.cs" />
     <Compile Include="Framework\PassThroughBlockFactory.cs" />
     <Compile Include="Framework\TimedCalendargramAggregatorBlockFactory.cs" />
     <Compile Include="Framework\TimedSetAggregatorBlockFactory.cs" />

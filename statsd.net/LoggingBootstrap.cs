@@ -1,10 +1,8 @@
 ﻿namespace statsd.net
 {
     using System;
-    using System.Diagnostics;
     using System.IO;
     using Serilog;
-    using Serilog.Events;
         
     public static class LoggingBootstrap
     {
@@ -16,8 +14,8 @@
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .Enrich.WithProcessId()
-                .Enrich.WithProcessId()
                 .Enrich.WithThreadId()
+                .Enrich.With<EventTypeEnricher>()
                 .WriteTo.LiterateConsole(outputTemplate: logLayout)
                 .WriteTo.File(logFileName, outputTemplate: logLayout)
                 .CreateLogger();
