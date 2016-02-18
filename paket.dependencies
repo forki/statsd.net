@@ -1,0 +1,18 @@
+source https://www.nuget.org/api/v2/
+framework >= net45
+
+nuget CommandLineParser
+nuget Kayak
+nuget LibLog
+nuget Microsoft.Tpl.Dataflow
+nuget murmurhash
+nuget NSubstitute
+nuget Polly
+nuget Serilog.Sinks.Literate
+nuget Shouldly
+nuget SimpleJson
+nuget StatsdCsharpClient
+nuget TinyIoC
+nuget Topshelf
+nuget xunit
+nuget xunit.runner.visualstudio

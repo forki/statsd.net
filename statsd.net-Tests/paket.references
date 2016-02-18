@@ -1,0 +1,6 @@
+Microsoft.Tpl.Dataflow
+NSubstitute
+Shouldly
+StatsdCsharpClient
+xunit
+xunit.runner.visualstudio

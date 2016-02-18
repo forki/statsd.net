@@ -1,0 +1,8 @@
+LibLog
+Microsoft.Tpl.Dataflow
+murmurhash
+Polly
+Serilog.Sinks.Literate
+SimpleJson
+StatsdCsharpClient
+Topshelf
