@@ -79,6 +79,12 @@ publish
 # Publish Web Output
 *.Publish.xml
 
+# Paket Package Manager Main exe
+.paket/paket.exe
+
+# FAKE Build temporary
+.fake/
+
 # NuGet Packages Directory
 packages
 
