@@ -1,5 +1,5 @@
 source https://www.nuget.org/api/v2/
-framework >= net45
+framework >= net452
 
 nuget CommandLineParser
 nuget Kayak
@@ -8,7 +8,8 @@ nuget Microsoft.Tpl.Dataflow
 nuget murmurhash
 nuget NSubstitute
 nuget Polly
-nuget Serilog.Sinks.Literate
+nuget Serilog 1.5.14
+nuget Serilog.Sinks.Literate 1.2.0
 nuget Shouldly
 nuget SimpleJson
 nuget StatsdCsharpClient
