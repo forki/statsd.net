@@ -8,8 +8,12 @@ nuget Microsoft.Tpl.Dataflow
 nuget murmurhash
 nuget NSubstitute
 nuget Polly
-nuget Serilog 1.5.14
-nuget Serilog.Sinks.Literate 1.2.0
+nuget Serilog
+nuget Serilog.Sinks.Literate
+nuget Serilog.Enrichers.Environment
+nuget Serilog.Enrichers.Process
+nuget Serilog.Enrichers.Thread
+nuget Serilog.Sinks.File
 nuget Shouldly
 nuget SimpleJson
 nuget StatsdCsharpClient
