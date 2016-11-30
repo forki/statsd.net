@@ -1,4 +1,4 @@
-Microsoft.Tpl.Dataflow
+System.Threading.Tasks.Dataflow
 NSubstitute
 Shouldly
 StatsdCsharpClient

@@ -1,5 +1,5 @@
 LibLog
-Microsoft.Tpl.Dataflow
+System.Threading.Tasks.Dataflow
 murmurhash
 Polly
 Serilog.Sinks.Literate

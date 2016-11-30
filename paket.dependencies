@@ -1,10 +1,10 @@
 source https://www.nuget.org/api/v2/
-framework >= net452
+framework = net452
 
 nuget CommandLineParser
 nuget Kayak
 nuget LibLog
-nuget Microsoft.Tpl.Dataflow
+nuget System.Threading.Tasks.Dataflow
 nuget murmurhash
 nuget NSubstitute
 nuget Polly
