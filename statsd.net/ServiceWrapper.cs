@@ -9,7 +9,7 @@
   public class ServiceWrapper : ServiceControl
   {
     private Statsd _statsd;
-    private string _configFile;
+    private readonly string _configFile;
     private StatsdnetConfiguration _config;
 
     public ServiceWrapper()

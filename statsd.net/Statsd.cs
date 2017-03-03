@@ -19,22 +19,16 @@
 
     public class Statsd
     {
-        private TransformBlock<string, StatsdMessage> _messageParser;
-        private StatsdMessageRouterBlock _router;
-        private BroadcastBlock<Bucket> _messageBroadcaster;
-        private List<IBackend> _backends;
+        private readonly TransformBlock<string, StatsdMessage> _messageParser;
+        private readonly StatsdMessageRouterBlock _router;
+        private readonly BroadcastBlock<Bucket> _messageBroadcaster;
+        private readonly List<IBackend> _backends;
         private List<IListener> _listeners;
-        private CancellationTokenSource _tokenSource;
-        private ManualResetEvent _shutdownComplete;
+        private readonly CancellationTokenSource _tokenSource;
+        private readonly ManualResetEvent _shutdownComplete;
         private static readonly ILog _log = LogProvider.GetLogger("statsd.net");
 
-        public WaitHandle ShutdownWaitHandle
-        {
-            get
-            {
-                return _shutdownComplete;
-            }
-        }
+        public WaitHandle ShutdownWaitHandle => _shutdownComplete;
 
         public Statsd(string serviceName = null)
         {

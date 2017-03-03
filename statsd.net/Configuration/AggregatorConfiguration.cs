@@ -54,11 +54,11 @@ namespace statsd.net.Configuration
 
     public class TimersAggregationConfig : AggregatorConfiguration
     {
-        private List<PercentileConfig> _percentiles;
+        private readonly List<PercentileConfig> _percentiles;
 
         public string Namespace { get; set; }
         public bool CalculateSumSquares { get; set; }
-        public IReadOnlyList<PercentileConfig> Percentiles { get { return _percentiles; } }
+        public IReadOnlyList<PercentileConfig> Percentiles => _percentiles;
 
         public TimersAggregationConfig(string ns, bool calculateSumSquares)
         {
