@@ -40,7 +40,7 @@ namespace DemoDataFeeder
                 client.LogCount( "test.count.bigValue", rnd.Next( 50 ) );
                 client.LogTiming( "test.timing." + rnd.Next( 5 ), rnd.Next( 100, 2000 ) );
                 client.LogGauge( "test.gauge." + rnd.Next( 5 ), rnd.Next( 100 ) );
-                client.LogCalendargram("test.calendargram.users", letters.Next(), CalendargramRetentionPeriod.ONE_MINUTE);
+                client.LogCalendargram("test.calendargram.users", letters.Next(), "m");
                 Thread.Sleep( options.Delay );
                 Interlocked.Add( ref totalMetricsSent, 4 );
 

@@ -1,24 +1,26 @@
-﻿using StatsdClient;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace statsd.net_Tests.Infrastructure
+﻿namespace statsd.net_Tests.Infrastructure
 {
-  internal class InAppListenerOutputChannel : IOutputChannel
-  {
-    private InAppListener _listener;
+    using System.Threading.Tasks;
+    using StatsdClient;
 
-    public InAppListenerOutputChannel(InAppListener listener)
+    internal class InAppListenerOutputChannel : IOutputChannel
     {
-      _listener = listener;
-    }
+        private readonly InAppListener _listener;
 
-    public void Send(string line)
-    {
-      _listener.Send(line);
+        public InAppListenerOutputChannel(InAppListener listener)
+        {
+            _listener = listener;
+        }
+
+        public void Send(string line)
+        {
+            _listener.Send(line);
+        }
+
+        public Task SendAsync(string line)
+        {
+            _listener.Send(line);
+            return Task.FromResult(0);
+        }
     }
-  }
 }
