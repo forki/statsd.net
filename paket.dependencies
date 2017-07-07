@@ -9,7 +9,7 @@ nuget murmurhash
 nuget NSubstitute
 nuget Polly
 nuget Serilog
-nuget Serilog.Sinks.Literate
+nuget Serilog.Sinks.Console
 nuget Serilog.Enrichers.Environment
 nuget Serilog.Enrichers.Process
 nuget Serilog.Enrichers.Thread

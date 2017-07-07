@@ -197,8 +197,8 @@
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5.2'">
       <ItemGroup>
-        <Reference Include="Serilog.Sinks.File">
-          <HintPath>..\packages\Serilog.Sinks.File\lib\net45\Serilog.Sinks.File.dll</HintPath>
+        <Reference Include="Serilog.Sinks.Console">
+          <HintPath>..\packages\Serilog.Sinks.Console\lib\net45\Serilog.Sinks.Console.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -208,8 +208,8 @@
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5.2'">
       <ItemGroup>
-        <Reference Include="Serilog.Sinks.Literate">
-          <HintPath>..\packages\Serilog.Sinks.Literate\lib\net45\Serilog.Sinks.Literate.dll</HintPath>
+        <Reference Include="Serilog.Sinks.File">
+          <HintPath>..\packages\Serilog.Sinks.File\lib\net45\Serilog.Sinks.File.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>

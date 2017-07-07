@@ -2,7 +2,7 @@ LibLog
 System.Threading.Tasks.Dataflow
 murmurhash
 Polly
-Serilog.Sinks.Literate
+Serilog.Sinks.Console
 Serilog.Enrichers.Environment
 Serilog.Enrichers.Process
 Serilog.Enrichers.Thread

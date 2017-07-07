@@ -16,7 +16,7 @@
                 .Enrich.WithProcessId()
                 .Enrich.WithThreadId()
                 .Enrich.With<EventTypeEnricher>()
-                .WriteTo.LiterateConsole(outputTemplate: logLayout)
+                .WriteTo.Console(outputTemplate: logLayout)
                 .WriteTo.File(logFileName, outputTemplate: logLayout)
                 .CreateLogger();
         }
